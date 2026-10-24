@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fazal</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Instrument+Sans:wght@400;600&family=Instrument+Serif:ital@1&family=Space+Mono:wght@700&display=swap">
+<style>
+:root{
+  --bg:#2340ff; --fg:#fffdf2; --accent:#ffd400; --muted:#c6cffe; --line:rgba(255,253,242,.4);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1a7a;--muted:#a9b4f5;--line:rgba(255,253,242,.3)}}
+:root[data-theme="dark"]{--bg:#0f1a7a;--muted:#a9b4f5;--line:rgba(255,253,242,.3)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+*,*::before,*::after{box-sizing:inherit}
+body{
+  margin:0;min-height:100vh;background:var(--bg);color:var(--fg);
+  font:400 1.05rem/1.5 "Instrument Sans",system-ui,sans-serif;
+}
+main{
+  min-height:100vh;display:flex;flex-direction:column;justify-content:space-between;gap:3rem;
+  padding:clamp(1.25rem,4vw,3rem);max-width:1400px;margin:0 auto;
+}
+
+/* Wordmark: each letter flips between typographic variants */
+.wordmark{
+  display:flex;margin:0;font-size:clamp(3.5rem,19vw,15rem);line-height:1;
+  perspective:900px;font-weight:400;cursor:default;user-select:none;
+}
+.ch{
+  display:inline-block;width:.78em;height:1em;line-height:1;text-align:center;
+  transform-origin:50% 50%;transition:transform .18s ease-in;backface-visibility:hidden;
+}
+.ch.out{transform:rotateX(90deg)}
+.v-heavy{font-family:"Bowlby One",Impact,sans-serif}
+.v-serif{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-size:1.12em}
+.v-mono{font-family:"Space Mono",ui-monospace,Menlo,monospace;font-weight:700}
+.v-outline{font-family:"Bowlby One",Impact,sans-serif;color:transparent;-webkit-text-stroke:.025em var(--fg)}
+.v-block{font-family:"Bowlby One",Impact,sans-serif;background:var(--accent);color:var(--bg)}
+
+.intro{display:grid;gap:2.5rem}
+.statement{
+  margin:0;max-width:28ch;font-weight:600;
+  font-size:clamp(1.5rem,3.6vw,2.6rem);line-height:1.15;letter-spacing:-.01em;
+}
+.links{display:grid}
+.row{
+  display:grid;grid-template-columns:1fr 1.2fr;gap:.5rem 1.5rem;align-items:baseline;
+  padding:1.2rem 0;border-top:1.5px solid var(--line);color:inherit;text-decoration:none;
+  transition:background .2s,color .2s,padding .2s;
+}
+.row:last-child{border-bottom:1.5px solid var(--line)}
+.row .t{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-size:clamp(1.8rem,4vw,2.8rem);line-height:1.1}
+.row .d{color:var(--muted);transition:color .2s}
+.row:hover,.row:focus-visible{background:var(--accent);color:var(--bg);padding-inline:1rem;outline:none}
+.row:hover .d,.row:focus-visible .d{color:var(--bg)}
+.row:focus-visible{box-shadow:inset 0 0 0 3px var(--fg)}
+@media (max-width:640px){.row{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.ch,.row{transition:none}}
+</style>
+</head>
+<body>
+<main>
+  <h1 class="wordmark" id="wordmark" aria-label="Fazal"></h1>
+  <div class="intro">
+    <p class="statement">I am a Senior Software Engineer and AI Architect with experience in
+            Backend Development, AI/ML, RAG Systems, DevOps, and Cloud
+            Infrastructure.</newline>
+                    I build scalable applications using Python, Django, Node.js,
+            PostgreSQL, Docker, and Hugging Face technologies.</p>
+    <nav class="links" aria-label="Links" id="links"></nav>
+  </div>
+</main>
+<script>
+// Edit this object to change content.
+const CONFIG = {
+  name: "Fazal",
+  links: [
+    { title: "Hugging Face", desc: "My models and experiments.", href: "https://huggingface.co/Dfazal" },
+    { title: "GitHub", desc: "My repositories and open-source work.", href: "https://github.com/fazal-coder" },
+    { title: "Email", desc: "Open to projects and collaboration.", href: "mailto:fazaldkhan315@gmail.com" } // replace with your address
+  ]
+};
+const VARIANTS = ["v-heavy", "v-serif", "v-mono", "v-outline", "v-block"];
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function mountLinks(root, links) {
+  links.forEach(({ title, desc, href }) => {
+    const a = document.createElement("a");
+    a.className = "row";
+    a.href = href;
+    if (!href.startsWith("mailto:")) { a.target = "_blank"; a.rel = "noopener"; }
+    a.innerHTML = `<span class="t"></span><span class="d"></span>`;
+    a.firstChild.textContent = title;
+    a.lastChild.textContent = desc;
+    root.appendChild(a);
+  });
+}
+
+function createLetter(char, index) {
+  const el = document.createElement("span");
+  el.className = "ch";
+  el.setAttribute("aria-hidden", "true");
+  el.textContent = char;
+  let state = index % VARIANTS.length;
+  let busy = false;
+  el.classList.add(VARIANTS[state]);
+
+  const flip = () => {
+    if (busy) return;
+    busy = true;
+    el.classList.add("out");                       // rotate edge-on
+    setTimeout(() => {
+      el.classList.remove(VARIANTS[state]);
+      state = (state + 1) % VARIANTS.length;       // swap variant while invisible
+      el.classList.add(VARIANTS[state]);
+      el.classList.remove("out");                  // rotate back
+      setTimeout(() => { busy = false; }, 200);
+    }, 180);
+  };
+  return { el, flip };
+}
+
+function mountWordmark(root, name) {
+  [...name].forEach((char, i) => {
+    const { el, flip } = createLetter(char, i);
+    root.appendChild(el);
+    if (reduceMotion) return;
+    el.addEventListener("pointerenter", flip);     // interactive: hover to flip
+    setTimeout(() => { flip(); setInterval(flip, 3200); }, 900 + i * 260); // staggered loop
+  });
+}
+
+mountWordmark(document.getElementById("wordmark"), CONFIG.name);
+mountLinks(document.getElementById("links"), CONFIG.links);
+</script>
+</body>
+</html>
